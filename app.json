@@ -11,6 +11,18 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "fonts": [
+        {
+          "src": "./assets/fonts/Roboto-Regular.ttf",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "src": "./assets/fonts/Roboto-Bold.ttf",
+          "weight": "700",
+          "style": "normal"
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -32,7 +44,11 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
