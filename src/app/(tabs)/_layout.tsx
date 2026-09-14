@@ -1,5 +1,6 @@
+import { colors } from "@/theme/color";
 import { Tabs } from "expo-router";
-import { Image, StyleSheet } from "react-native";
+import { Image } from "react-native";
 
 const todayIcon = require("@/assets/images/tabIcons/today.png");
 const calendarIcon = require("@/assets/images/tabIcons/calendar.png");
@@ -10,13 +11,14 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#FF6B3D",
-        tabBarInactiveTintColor: "#1C1C22",
-       
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.inkMuted,
         tabBarLabelStyle: { fontFamily: "PlusJakartaSans-Regular" },
         tabBarStyle: {
           height: 70,
-          
+          backgroundColor: colors.card,
+          borderTopColor: colors.card,
+          borderTopWidth: 1,
         },
       }}
     >
@@ -27,14 +29,12 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Image
               source={todayIcon}
-              style={[
-                styles.icon,
-                {
-                  width: size,
-                  height: size,
-                  tintColor: focused ? "#FF6B3D" : "#1C1C22",
-                },
-              ]}
+              resizeMode="contain"
+              style={{
+                width: size,
+                height: size,
+                tintColor: focused ? colors.accent : colors.inkMuted,
+              }}
             />
           ),
         }}
@@ -46,14 +46,12 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Image
               source={calendarIcon}
-              style={[
-                styles.icon,
-                {
-                  width: size,
-                  height: size,
-                  tintColor: focused ? "#FF6B3D" : "#1C1C22",
-                },
-              ]}
+              resizeMode="contain"
+              style={{
+                width: size,
+                height: size,
+                tintColor: focused ? colors.accent : colors.inkMuted,
+              }}
             />
           ),
         }}
@@ -65,14 +63,12 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Image
               source={settingsIcon}
-              style={[
-                styles.icon,
-                {
-                  width: size,
-                  height: size,
-                  tintColor: focused ? "#FF6B3D" : "#1C1C22",
-                },
-              ]}
+              resizeMode="contain"
+              style={{
+                width: size,
+                height: size,
+                tintColor: focused ? colors.accent : colors.inkMuted,
+              }}
             />
           ),
         }}
@@ -80,9 +76,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  icon: {
-    resizeMode: "contain", // iconların boyutunu koruyarak içine sığdırır
-  },
-});

@@ -1,80 +1,159 @@
-
+import { useCheckIns } from "@/hooks/useCheckIns";
+import { useHabits } from "@/hooks/useHabits";
+import {
+  completedTodayCount,
+  currentStreak,
+  isCheckedOn,
+  longestStreakAcrossHabits,
+  todayKey,
+} from "@/lib";
 import { colors } from "@/theme/color";
 import { textStyles } from "@/theme/typography";
-import { Checkbox } from 'expo-checkbox';
-import { useEffect, useState } from "react";
+import { Checkbox } from "expo-checkbox";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-function formToday(date = new Date ())
-{
-  const day = date.getDate(); // 1
-  const month = date.toLocaleDateString("tr-TR", { month: "long" }); // Eylül
-  const weekday = date.toLocaleDateString("tr-TR", { weekday: "long" }); // Pazartesi
-  const cap  = (s:string) => s.charAt(0).toLocaleUpperCase() + s.slice(1); // Pazartesi, Eylül
-  return `${day} ${cap(month)} ${cap(weekday)}`; // 1 Eylül Pazartesi
+
+function formToday(date = new Date()) {
+  const day = date.getDate();
+  const month = date.toLocaleDateString("tr-TR", { month: "long" });
+  const weekday = date.toLocaleDateString("tr-TR", { weekday: "long" });
+  const cap = (s: string) => s.charAt(0).toLocaleUpperCase() + s.slice(1);
+  return `${day} ${cap(month)} ${cap(weekday)}`;
 }
 
 export default function Index() {
-  const [todayLabel,setTodayLabel] = useState<string> (formToday());
-  const [isChecked, setChecked] = useState(false);
-  const [isFirstAdd,setIsFirstAdd] = useState(true);
- useEffect(() => {
-   
+  const router = useRouter();
+  const [todayLabel, setTodayLabel] = useState<string>(formToday());
+  const { habits, loading, refresh: refreshHabits } = useHabits();
+  const {
+    checkIns,
+    refresh: refreshCheckIns,
+    toggle,
+  } = useCheckIns();
+
+  const today = todayKey();
+  const habitIds = useMemo(() => habits.map((h) => h.id), [habits]);
+  const doneToday = completedTodayCount(checkIns, habitIds, today);
+  const bestStreak = longestStreakAcrossHabits(checkIns, habitIds);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setTodayLabel(formToday());
-    }, 60000); 
+    }, 60000);
 
-  
     return () => clearInterval(timer);
-  }, [])
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshHabits();
+      refreshCheckIns();
+    }, [refreshHabits, refreshCheckIns])
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={[textStyles.bold, styles.date]}>{todayLabel}</Text>
         <Text style={[textStyles.bold, styles.title]}>Bugün</Text>
-        <View style = {styles.statCard}>
-        <Text style ={[textStyles.medium ,styles.statLabel]}>En Uzun Seri</Text>
-        <View style = {styles.statRow}>
-          <Text style={[textStyles.bold ,styles.statNumber]}>0</Text>
-          <Text style={[textStyles.semibold ,styles.statUnit]}>gün üst üste</Text>
-          <Text style={[textStyles.regular ,styles.statSub]}>0/ 0 alışkanlık tamam</Text>
-        </View>
-        </View>
+
+        {habits.length > 0 && (
+          <View style={styles.statCard}>
+            <Text style={[textStyles.medium, styles.statLabel]}>
+              En Uzun Seri
+            </Text>
+            <View style={styles.statRow}>
+              <Text style={[textStyles.bold, styles.statNumber]}>
+                {bestStreak}
+              </Text>
+              <Text style={[textStyles.semibold, styles.statUnit]}>
+                gün üst üste
+              </Text>
+            </View>
+            <Text style={[textStyles.regular, styles.statSub]}>
+              {doneToday} / {habits.length} alışkanlık tamam
+            </Text>
+          </View>
+        )}
+
         <View style={styles.sectionHeader}>
-        <Text style={[textStyles.semibold, styles.sectionTitle]}>Alışkanlıklar</Text>
-        <Pressable onPress={() => setIsFirstAdd(false)}>
-        <Text style={[textStyles.semibold, styles.AddHabitButtonText]}>+ Ekle</Text>
-        </Pressable>
+          <Text style={[textStyles.semibold, styles.sectionTitle]}>
+            Alışkanlıklar
+          </Text>
+          <Pressable onPress={() => router.push("/add")}>
+            <Text style={[textStyles.semibold, styles.AddHabitButtonText]}>
+              + Ekle
+            </Text>
+          </Pressable>
         </View>
-         {isFirstAdd ?(
-          <Pressable onPress={() => setIsFirstAdd(false)}>
+
+        {loading ? (
+          <Text style={[textStyles.regular, styles.firstAddText]}>
+            Yükleniyor…
+          </Text>
+        ) : habits.length === 0 ? (
+          <Pressable onPress={() => router.push("/add")}>
             <Text style={[textStyles.regular, styles.firstAddText]}>
               İlk alışkanlığını eklemek için tıklayın
             </Text>
           </Pressable>
-         ):(
+        ) : (
+          habits.map((habit) => {
+            const checked = isCheckedOn(checkIns, habit.id, today);
+            const streak = currentStreak(checkIns, habit.id, today);
 
-        <View style = {styles.habitRow}>
-          <View style={styles.habitAvatar}>
-            <Text style={[textStyles.semibold, styles.habitAvatarText]}>A</Text>
-          </View>
-          
-          <View style={styles.habitText}>
-            <Text style={[textStyles.semibold, styles.habitName]}>Alışkanlık 1</Text>
-            <Text style={[textStyles.regular, styles.habitStreak]}>0 gün üst üste</Text>
-        
-          </View>
-          <View style={styles.checkButton}>
-          <Checkbox
-          style={styles.checkButton}
-          value={isChecked}
-          onValueChange={setChecked}
-          color={isChecked ? colors.accent : colors.ink}
-        />
-        </View> 
-        </View>
+            return (
+              <View key={habit.id} style={styles.habitRow}>
+                <Pressable
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                  }}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/add",
+                      params: { id: habit.id },
+                    })
+                  }
+                >
+                  <View
+                    style={[
+                      styles.habitAvatar,
+                      { backgroundColor: habit.color },
+                    ]}
+                  >
+                    <Text
+                      style={[textStyles.semibold, styles.habitAvatarText]}
+                    >
+                      {habit.name.charAt(0).toLocaleUpperCase("tr-TR")}
+                    </Text>
+                  </View>
+                  <View style={styles.habitText}>
+                    <Text style={[textStyles.semibold, styles.habitName]}>
+                      {habit.name}
+                    </Text>
+                    <Text style={[textStyles.regular, styles.habitStreak]}>
+                      {streak} gün üst üste
+                    </Text>
+                  </View>
+                </Pressable>
+
+                <View style={styles.checkButton}>
+                  <Checkbox
+                    style={styles.checkButton}
+                    value={checked}
+                    onValueChange={() => toggle(habit.id)}
+                    color={checked ? colors.accent : colors.ink}
+                  />
+                </View>
+              </View>
+            );
+          })
         )}
-                
       </View>
     </SafeAreaView>
   );
@@ -86,8 +165,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   header: {
-  paddingHorizontal: 20,
-  paddingTop: 12,
+    paddingHorizontal: 20,
+    paddingTop: 12,
   },
   date: {
     fontSize: 14,
@@ -102,7 +181,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: 24,
     padding: 20,
-   /* marginHorizontal: 20,*/
     marginTop: 20,
   },
   statLabel: {
@@ -138,13 +216,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.accent,
   },
- 
   AddHabitButtonText: {
     fontSize: 16,
     color: colors.accent,
-  },
-  habitSection: {
-    marginTop: 24,
   },
   habitRow: {
     flexDirection: "row",
@@ -163,7 +237,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   habitText: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -173,12 +246,11 @@ const styles = StyleSheet.create({
   },
   habitName: { fontSize: 16, color: colors.ink },
   habitAvatarText: { fontSize: 20, color: colors.white },
-
   habitStreak: { fontSize: 13, color: colors.inkMuted, marginTop: 2 },
   checkButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
@@ -189,4 +261,4 @@ const styles = StyleSheet.create({
     marginTop: 24,
     textAlign: "center",
   },
-})
+});
