@@ -90,7 +90,7 @@ export default function AddHabitScreen() {
           await updateHabit(id, { reminderHour: null });
           Alert.alert(
             "Hatırlatma kurulamadı",
-            "Bildirim izni yok. Alışkanlık kaydedildi; hatırlatma kapalı."
+            "Expo Go (Android) veya bildirim izni nedeniyle hatırlatma yok. Alışkanlık kaydedildi."
           );
         }
       } else {
@@ -108,7 +108,7 @@ export default function AddHabitScreen() {
           await updateHabit(created.id, { reminderHour: null });
           Alert.alert(
             "Hatırlatma kurulamadı",
-            "Bildirim izni yok. Alışkanlık kaydedildi; hatırlatma kapalı."
+            "Expo Go (Android) veya bildirim izni nedeniyle hatırlatma yok. Alışkanlık kaydedildi."
           );
         }
       }

@@ -96,7 +96,7 @@ export default function Settings() {
         <Text style={[textStyles.bold, styles.title]}>Ayarlar</Text>
 
         <View style={styles.card}>
-          {perm !== null && perm !== "unavailable" && (
+          {perm !== null && perm !== "unavailable" ? (
             <Pressable onPress={handlePermission} style={styles.row}>
               <Text style={[textStyles.semibold, styles.rowLabel]}>
                 Bildirimler
@@ -105,7 +105,16 @@ export default function Settings() {
                 {permLabel(perm)}
               </Text>
             </Pressable>
-          )}
+          ) : perm === "unavailable" ? (
+            <View style={styles.row}>
+              <Text style={[textStyles.semibold, styles.rowLabel]}>
+                Bildirimler
+              </Text>
+              <Text style={[textStyles.regular, styles.rowValue]}>
+                Expo Go’da yok
+              </Text>
+            </View>
+          ) : null}
 
           <Pressable
             onPress={handleClearAll}

@@ -20,6 +20,8 @@ export {
   updateHabit,
 } from "./habit";
 export {
+  addReminderResponseListener,
+  areRemindersAvailable,
   cancelAllHabitReminders,
   cancelHabitReminder,
   getReminderPermissionStatus,

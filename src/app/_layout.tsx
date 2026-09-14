@@ -1,5 +1,5 @@
 import { colors } from "@/theme/color";
-import * as Notifications from "expo-notifications";
+import { addReminderResponseListener } from "@/lib/notifications";
 import { useFonts } from "expo-font";
 import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -21,10 +21,9 @@ export default function RootLayout() {
   }, [loaded, error]);
 
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(() => {
+    return addReminderResponseListener(() => {
       router.push("/");
     });
-    return () => sub.remove();
   }, []);
 
   if (!loaded && !error) {
